@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>The Pier | Sign up</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/app.css">
@@ -73,14 +74,14 @@
                 <form method="POST" action="/signup" id="f-signup">
                     {{ csrf_field() }}
                     <div class="mb-3 form-floating">
-                        <input type="email" class="form-control" id="fi-email" name="email" placeholder="name@example.com">
+                        <input type="email" class="form-control" id="fi-email" name="email" placeholder="name@example.com" value="{{ old('email') }}">
                         <label for="fi-email">Email</label>
                         <div class="valid-feedback">格式正確</div>
                         <div id="msg-email" class="invalid-feedback" data-msg01="email 格式錯誤 (長度需大於 2 字, 並包含 @)" data-msg02="email 已被註冊">請輸入 email</div>
                     </div>
 
                     <div class="mb-3 form-floating">
-                        <input type="text" class="form-control" id="fi-username" name="username" placeholder="username">
+                        <input type="text" class="form-control" id="fi-username" name="username" placeholder="username" value="{{ old('username') }}">
                         <label for="fi-username">帳號</label>
                         <div id="msg-username" class="invalid-feedback" data-msg01="帳號格式錯誤 (長度需介於 3-10 字)">請輸入帳號</div>
                     </div>
@@ -131,7 +132,148 @@
     <!-- toastify -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        // JavaScript for form validation
+        var flag_email = false;
+        var flag_username = false;
+        var flag_pwd = false;
+        var flag_pwd_chk = false;
+        var chk_value = [];
+        var dataJSON = {};
+
+        var op_message = "";
+
+        doCheck();
+
+        // 監聽 email
+        $("#fi-email").bind("input propertyChange", function() {
+            const reg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if ($(this).val().length > 2 && (reg.test($(this).val()))) {
+                const dataJSON = {};
+                dataJSON.email = $("#fi-email").val();
+                showdata_checkuni({
+                    "status": "success"
+                });
+
+            } else {
+                $("#fi-email").removeClass("is-valid");
+                $("#fi-email").addClass("is-invalid");
+
+                op_message = $("#msg-email").data("msg01");
+                $("#msg-email").text(op_message);
+                flag_email = false;
+            }
+        });
+
+        // 監聽 帳號
+        $("#fi-username").bind("input propertyChange", function() {
+
+            if ($(this).val().length >= 3 && $(this).val().length <= 10) {
+                $("#fi-username").removeClass("is-invalid");
+                $("#fi-username").addClass("is-valid");
+                flag_username = true;
+            } else {
+                $("#fi-username").removeClass("is-valid");
+                $("#fi-username").addClass("is-invalid");
+
+                op_message = $("#msg-username").data("msg01");
+                $("#msg-username").text(op_message);
+                flag_username = false;
+            }
+        });
+
+        // 監聽 密碼
+        $("#fi-pwd").bind("input propertyChange", function() {
+            // 檢查密碼一致
+            checkPwd();
+
+            if ($(this).val().length >= 3 && $(this).val().length <= 12) {
+                $("#fi-pwd").removeClass("is-invalid");
+                $("#fi-pwd").addClass("is-valid");
+                flag_pwd = true;
+            } else {
+                $("#fi-pwd").removeClass("is-valid");
+                $("#fi-pwd").addClass("is-invalid");
+
+                op_message = $("#msg-pwd").data("msg01");
+                $("#msg-pwd").text(op_message);
+                flag_pwd = false;
+            }
+        });
+
+        // 監聽 確認密碼
+        $("#fi-pwd-chk").bind("input propertyChange", checkPwd);
+
+        $("#fi-email, #fi-username, #fi-pwd, #fi-pwd-chk").on("input", function() {    
+            doCheck();
+        });
+
+        function showdata_checkuni(data) {
+            if (data.status == "success") {
+                $("#fi-email").removeClass("is-invalid");
+                $("#fi-email").addClass("is-valid");
+                flag_email = true;
+            } else {
+                $("#fi-email").removeClass("is-valid");
+                $("#fi-email").addClass("is-invalid");
+
+                if (data.message == "無效的 email 名稱") {
+                    op_message = $("#msg-email").data("msg02");
+                    $("#msg-email").text(op_message);
+                }
+                flag_email = false;
+            }
+        }
+
+        function checkPwd() {
+            if ($("#fi-pwd-chk").val() == $("#fi-pwd").val()) {
+                $("#fi-pwd-chk").removeClass("is-invalid");
+                $("#fi-pwd-chk").addClass("is-valid");
+                flag_pwd_chk = true;
+            } else {
+                $("#fi-pwd-chk").removeClass("is-valid");
+                $("#fi-pwd-chk").addClass("is-invalid");
+                flag_pwd_chk = false;
+            }
+        }
+
+        function checkEmail() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/member/check",
+                data: {
+                    "email": dataJSON.email,
+                    "_token": "{{ csrf_token() }}"
+                },
+                dataType: "json",
+                success: showdata_checkuni,
+                error: function(error) {
+                    alert("error- /member/check");
+                }
+            })
+        }
+
+        function doCheck() {
+            $('#btn-submit').attr('disabled', !(flag_email && flag_username && flag_pwd && flag_pwd_chk));
+        }
+
+        function sendData() {
+            if(flag_email == true && flag_username == true && flag_pwd == true && flag_pwd_chk == true) {
+                $("form").submit();
+            }
+        };
+
+        function show_msg(data) {
+            alert("註冊成功");
+
+            // 導向首頁
+            window.location.replace("/");
+        }
     </script>
 </body>
 </html>

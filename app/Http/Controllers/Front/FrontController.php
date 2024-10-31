@@ -28,12 +28,10 @@ class FrontController extends Controller
 
         // 如果偵測到 session 紀錄，就移除登入相關紀錄
         if (session()->has('username') || session()->has('memberId')) {
-            session()->forget('username');
-            session()->forget('memberId');
-            session()->save();
+            session()->flush();
         }
-        
-        return view('Front.home.login')->withCookie(cookie("session_id", null, -1));;
+
+        return view('Front.home.login');
     }
 
     /**
@@ -94,6 +92,15 @@ class FrontController extends Controller
      * @return \Illuminate\Http\RedirectResponse 返回登入頁面或導向首頁
      */
     public function doSignup(Request $req) {
+
+        // 檢查 email 是否被使用
+        $member = Member::where("email", $req->email)->first();
+        if (isset($member))
+        {
+            return back()->withInput()->withErrors(["error" => "email 已被使用"]);
+            exit;
+        }
+
         $member = new Member();
         $member->email = $req->email;
         $member->username = $req->username;
