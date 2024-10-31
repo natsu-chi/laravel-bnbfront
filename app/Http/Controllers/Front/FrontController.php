@@ -27,13 +27,13 @@ class FrontController extends Controller
     public function login() {
 
         // 如果偵測到 session 紀錄，就移除登入相關紀錄
-        if (session()->has('username')) {
+        if (session()->has('username') || session()->has('memberId')) {
             session()->forget('username');
             session()->forget('memberId');
             session()->save();
         }
         
-        return view('Front.home.login');
+        return view('Front.home.login')->withCookie(cookie("session_id", null, -1));;
     }
 
     /**
@@ -44,6 +44,7 @@ class FrontController extends Controller
      * @return \Illuminate\Http\RedirectResponse 返回登入頁面或導向首頁
      */
     public function doLogin(Request $req) {
+
         // 檢查驗證碼
         if (captcha_check($req->code) == false)
         {
@@ -64,6 +65,13 @@ class FrontController extends Controller
         session()->put("username", $member->username); // 使用者名稱
         session()->put("memberId", $member->id);       // 使用者 ID
         session()->save();
+
+        // 如果勾選「記住我」，將 session ID 存入 cookie
+        if ($req->filled("rememberMe")) {
+            $cookie = cookie("session_id", session()->getId(), 43200);
+            return redirect("/")->withCookie($cookie);
+        }
+
         return redirect("/");
 
     }
