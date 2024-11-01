@@ -81,11 +81,16 @@
                         <!-- {{ csrf_field() }} -->
                         <div class='search-item'>
                             <label class='text-xs'>地點</label>
-                            <input type="hidden" id='location' name='location'>
-                            <input type='text' placeholder='搜尋目的地' class='text-sm' id='location-text' name='location-text'
+                            <input type='text' placeholder='搜尋目的地' class='text-sm' id='location' name='location'
                                 autocomplete='off' list='list01'>
                             <datalist id='list01'>
-                                <option data-value='1'>台北 Taipei</option>
+                                <!-- <option data-value='1'>台北 Taipei</option> -->
+                                <option value='Taipei'>台北</option>
+                                <option value='San Francisco'>舊金山</option>
+                                <option value='New York'>紐約</option>
+                                <option value='Seattle'>西雅圖</option>
+                                <option value='Los Angeles'>洛杉磯</option>
+                                <option value='Chicago'>芝加哥</option>
                             </datalist>
                         </div>
                         <div class='search-item'>
@@ -134,10 +139,9 @@
     </div>
 
     <script>
-        var flagLocation = true; // 開放空白
-        var flagLocationText = false;
-        var flagCheckin = true; // 暫時開放空白
-        var flagCheckout = true; // 暫時開放空白
+        var flagLocation = false;
+        var flagCheckin = true;
+        var flagCheckout = true;
         var flagAdults = false;
         var flagUrl = false;
 
@@ -145,14 +149,6 @@
             // 預設隱藏
             $('#form02').hide();
             $('#text-msg').hide();
-
-            // 監聽 location (驗證 datalist 輸入資料)
-            $('#location-text').bind('input propertychange', function() {
-                const val = verifiDatalist('location-text');
-                if (val > 0) {
-                    $('#location').val(val);
-                }
-            });
         });
 
         function sendData(formId) {
@@ -162,13 +158,13 @@
 
             if (formId == 'form01') {
                 form.forEach(el => {
-                    if (el.name === 'location-text' && el.value != '') flagLocationText = true;
+                    if (el.name === 'location' && el.value != '') flagLocation = true;
                     if (el.name === 'checkin' && el.value != '') flagCheckin = true;
                     if (el.name === 'checkout' && el.value != '') flagCheckout = true;
                     if (el.name === 'adults' && el.value != '') flagAdults = true;
                 });
 
-                if (flagLocationText && flagCheckin && flagAdults && flagAdults && flagLocation) {
+                if (flagLocation && flagCheckin && flagAdults && flagAdults) {
                     $('#text-msg').hide();
                     $('#' + formId).submit();
                 } else {
@@ -179,8 +175,6 @@
                 form.forEach(el => {
                     // 檢查 form.name 是否符合正規表達式: https://開頭
                     if (el.name === 'url' && el.value != '' && urlRegex.test(el.value)) flagUrl = true;                
-                    // console.log(el.name);
-                    // console.log(el.value);
                 });
                 if (flagUrl) {
                     $('#text-msg').hide();
@@ -189,8 +183,6 @@
                     $('#text-msg').show();
                 }
             }
-
-
         }
     </script>
 
@@ -214,11 +206,9 @@
                 $('#form01').hide();
                 $('#form02').show();
             }
-
         });
     </script>
     <script>
-        // Call Air datepicker function
         const en = {
             days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
             daysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -238,30 +228,7 @@
         const datepicker02 = new AirDatepicker('#myDatepicker02', {
             locale: en, // Set language
         });
-
-        // const printCurrentTime = () => {
-        //     console.log(datepicker01.selectedDates) // print selected date
-        //     console.log(datepicker02.selectedDates) // print selected date
-        // }
     </script>
-    <script>
-        // 驗證 datalist: 傳入 inputId，如果 option 的選項文字對照到 data-value，回傳 true，否則回傳 false
-        function verifiDatalist(inputId) {
-            const $input = $('#' + inputId),
-                $options = $('#' + $input.attr('list') + ' option'),
-                inputVal = $input.val();
-            let verification = false;
-            for (let i = 0; i < $options.length; i++) {
-                const $option = $options.eq(i),
-                    dataVal = $option.data('value'),
-                    showWord = $option.text(),
-                    val = $option.val();
-                if (showWord == inputVal) {
-                    verification = dataVal;
-                }
-            }
-            return verification;
-        }
-    </script>
+    
 </div>
 @endsection
