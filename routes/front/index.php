@@ -16,6 +16,8 @@ Route::group(['prefix' => '/'], function(){
 Route::group(['prefix' => '/properties'], function(){
     // /search?location={city_name}&checkin={10/1/2024}&checkout{10/1/2024}=&adults=2&children=0&pets=0
     Route::get('/search', [ListingController::class, 'listByQueries']);
+    Route::get('/search/url', [ListingController::class, 'getByUrl']);
+    Route::get('/{id}', [ListingController::class, 'getById']);
 });
 
 Route::fallback(function () {

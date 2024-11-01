@@ -126,10 +126,14 @@
                         </button>
                     </div>
                 </form>
-
                 <div class='text-sm text-danger mt-3 ms-2' id='text-msg'>
                     請輸入正確資訊
                 </div>
+                @if ($errors->has("error"))
+                <div class='text-sm text-danger mt-3 ms-2' id='text-msg-reurn'>
+                    {{ $errors->first("error") }}
+                </div>
+                @endif
             </div>
         </div>
         <div class='col-md-6' style='height: 90vh;'>
@@ -173,7 +177,7 @@
             } else if (formId == 'form02') {
                 const urlRegex = /^(?:http?:\/\/)|(?:https?:\/\/)/;
                 form.forEach(el => {
-                    // 檢查 form.name 是否符合正規表達式: https://開頭
+                    // 檢查 form.name 是否符合正規表達式: http:// 或 https://開頭
                     if (el.name === 'url' && el.value != '' && urlRegex.test(el.value)) flagUrl = true;                
                 });
                 if (flagUrl) {
