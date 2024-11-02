@@ -51,4 +51,9 @@ class Listing extends Model
     {
         return $this->belongsTo(City::class, 'city_id');
     }
+
+    public function host()
+    {
+        return $this->belongsTo(Host::class, 'host_id');
+    }
 }

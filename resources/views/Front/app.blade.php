@@ -45,6 +45,13 @@
     <script src="/js/jquery-3.7.1.min.js"></script>
     <!-- Air datepicker -->
     <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
+    @if(isset($useLeaflet) && $useLeaflet)
+    <!-- 地圖 JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="/js/leaflet.markercluster.js"></script>
+    @endif
+    
     <!-- toastify -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     @if(Session::has("message"))

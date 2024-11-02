@@ -1,5 +1,8 @@
 @extends('Front.app')
 @section('title', 'The Pier | 房型資料立即查看')
+@php
+    $useLeaflet = true;
+@endphp
 @section('content')
 <style>
     .listing-title {
@@ -59,7 +62,7 @@
             <div>
                 <h1 class='fw-bold text-2xl'>{{ $data->name }}</h1>
                 <div class='rating'>
-                    <span>★★★★★</span> <span>(1 review)</span>
+                    <span>★★★★★</span> <span>({{ count($comments) }} 則評論)</span>
                 </div>
             </div>
 
@@ -116,7 +119,33 @@
                 </ul>
                 <a href='javascript:void(0)' onclick='show("sec-of02")' class='text-sm text-danger' id='link-show-sec-of02'>顯示更多</a>
             </div>
+
+            <!-- 留言區塊 -->
+            <div class='mt-4'>
+                <h3 class='text-xl fw-bold'>{{ count($comments) }} 則評論</h3>
+                @for ($i = 0; $i < min(2, count($comments)); $i++)
+                    <div class='border rounded p-3 mt-3'>
+                        <p class='fw-bold'>{{ $comments[$i]->reviewer_name}}&emsp;&emsp;</p>
+                        <p>{!! $comments[$i]->comments !!}</p>
+                        <span class='text-sm fw-normal text-muted'>{{ $comments[$i]->date}}</span>
+                    </div>
+                @endfor
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-sm btn-outline-danger mt-3" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    顯示全部
+                </button> 
+            </div>
+
+            <!-- 地圖區塊 -->
+            <div class='mt-4'>
+                <h3 class='text-xl fw-bold'>住宿地點</h3>
+                <div class="z-1">
+                    <div id="map" style='height: 60vh;max-height: 500px;'></div>
+                </div>
+            </div>
+            
         </div>
+
         <!-- Sidebar 價格 -->
         <div class='col-lg-4 mt-lg-5 border-bottom'>
             <!-- Wishlist Form -->
@@ -156,12 +185,92 @@
         <div class='col-8' style='background-image: url("/images/properties/search_data-not-found.svg"); background-size: cover; background-position: center;'></div>
     </div>
     @endif
+
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">評論內容</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            @foreach ($comments as $comment)
+                <div class='border rounded p-3 mt-3'>
+                    <p class='fw-bold'>{{ $comment->reviewer_name}}&emsp;&emsp;</p>
+                    <p>{!! $comment->comments !!}</p>
+                    <span class='text-sm fw-normal text-muted'>{{ $comment->date}}</span>
+                </div>
+            @endforeach
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+        </div>
+        </div>
+    </div>
+    </div>
 </div>
 <script>
+    $(document).ready(function() {
+        // 分類資料
+        propertyData = @json($data);
+        console.log(propertyData);
+
+        renderMap(new Array(propertyData));
+    });
+
     function show(id) {
         $('#' + id).removeClass('overflow-y-hidden');
         $('#' + id).attr('style', '');
         $('#link-show-' + id).hide();
+    }
+
+    // 產生地圖
+    function renderMap(dataList) {
+        // 最初水滴座標
+        map = L.map('map').setView([dataList[0].latitude, dataList[0].longitude], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        map.panTo([dataList[0].latitude, dataList[0].longitude]);
+
+        appendToMap(dataList);
+    }
+
+    function appendToMap(dataList) {
+        console.log(dataList);
+        $.each(dataList, function(i, item) {
+            L.marker([item.latitude, item.longitude]).addTo(map)
+                .bindPopup(
+                    '<div class="card" style="width: 15rem;">' +
+                    '<img src="' + item.picture_url + '" class="card-img-top bg-cover" alt="" style="max-height: 8rem;" onError="this.onerror=null; this.src=\'/images/settings/no_image.jpg\'" >' +
+                    '<div class="card-body">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                    '<span class="badge text-bg-primary">' + item.neighbourhood_cleansed + '</span>' +
+                    (item.liked === 'Y' ?
+                        '<i class="fa-solid fa-bookmark" onclick="toggleLike(\'N\')" style="cursor: pointer"></i>' :
+                        '<i class="fa-regular fa-bookmark" onclick="toggleLike(\'Y\')" style="cursor: pointer"></i>') +
+                    '</div>' +
+                    '<div class="text-truncate">' +
+                    '<a href="' + item.listing_url + '" target="_blank">' + item.name + '</a>' +
+                    '</div>' +
+                    '<div class="row text-truncate">' +
+                    '<div class="col-md-3 text-sm text-muted">建築類型</div>' +
+                    '<div class="col-md-9 text-sm text-muted text-end">' + item.property_type + '</div>' +
+                    '</div>' +
+                    '<div class="row text-truncate">' +
+                    '<div class="col-md-3 text-sm text-muted">房間類型</div>' +
+                    '<div class="col-md-9 text-sm text-muted text-end">' + item.room_type + '</div>' +
+                    '</div>' +
+                    '<div class="row text-truncate">' +
+                    '<div class="col text-sm fw-bold">$' + ((item.price == null) ? '--' : Math.floor(parseFloat(item.price)).toLocaleString()) + ' 晚</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>'
+                );
+        });
+
+        markers = new L.markerClusterGroup().addTo(map);
     }
 </script>
 @endsection
