@@ -30,6 +30,7 @@ class ListingController extends Controller
         $cityName = ucfirst($location); 
 
         // 取得城市的 listing 列表
+        $adults = (isset($adults)) ? $adults : 0;
         $listings = $city->listingsWithAccommodates($adults);
         return view('Front.properties.search', ['list' => $listings, 'cityName' => $cityName]);
     }

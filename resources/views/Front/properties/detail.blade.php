@@ -56,7 +56,7 @@
         <!-- Main Section -->
         <div class='col-lg-8'>
             <!-- Location 城市 -->
-            <p class='text-muted'><a href='/properties/search?location=1&checkin=&checkout=&adults=2'>{{ $cityInfo->name }}, {{ $cityInfo->country_short_name }}</a></p>
+            <p class='text-muted'><a href='/properties/search?location={{ $cityInfo->name }}&checkin=&checkout=&adults=2'>{{ $cityInfo->name }}, {{ $cityInfo->country_short_name }}</a></p>
 
             <!-- Title and Rating -->
             <div>
