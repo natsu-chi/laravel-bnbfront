@@ -20,4 +20,9 @@ class MemberWishlistItem extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function listing()
+    {
+        return $this->belongsTo(Listing::class, 'listing_id');
+    }
 }

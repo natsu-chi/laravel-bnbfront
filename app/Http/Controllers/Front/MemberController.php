@@ -107,6 +107,21 @@ class MemberController extends Controller
         }
     }
 
+    public function listWishlistItem()
+    {
+        if (!session()->get('memberId')) {
+            return response()->json(['error' => '無效查詢請求'], 400);
+        }
+        $mwiList = MemberWishlistItem::select('member_wishlist_item.*', 'listing.*')
+                                     ->join('listing', 'member_wishlist_item.listing_id', '=', 'listing.id')
+                                     ->where('member_wishlist_item.created_by', session()->get('memberId'))
+                                     ->where('member_wishlist_item.active', 'Y')
+                                     ->get();
+        if ($mwiList->isNotEmpty()) {
+            return view('Front.member.wishlist', ['list' => $mwiList]);
+        }
+    }
+
     public function addWishlistItem(Request $req)
     {
         $listingId = $req->listing_id;
@@ -115,7 +130,7 @@ class MemberController extends Controller
         $member = (new Member)->getById($id);
         if (empty($member)) {
             Session::flash("errorMessage", "收藏失敗");
-            response()->json(['error' => '加入清單失敗'], 400);
+            return response()->json(['error' => '加入清單失敗'], 400);
         }
 
         $mwi = MemberWishlistItem::where('created_by', $member->id)

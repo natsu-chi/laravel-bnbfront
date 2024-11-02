@@ -28,6 +28,7 @@ Route::group(['middleware' => 'member', 'prefix' => '/member'], function(){
         Route::post('/password/update', [MemberController::class, 'updatePassword']);
     });
     Route::group(['prefix' => '/wishlist'], function(){
+        Route::get('/', [MemberController::class, 'listWishlistItem']);
         Route::post('/add', [MemberController::class, 'addWishlistItem']);
         Route::post('/delete', [MemberController::class, 'deleteWishlistItem']);
     });

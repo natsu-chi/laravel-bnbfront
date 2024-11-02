@@ -237,7 +237,6 @@
             } else {
                 url = '/member/wishlist/delete';
             }
-            alert(url);
             $.ajax({
                 type: 'POST',
                 url: url,
