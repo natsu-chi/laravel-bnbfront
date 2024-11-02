@@ -19,7 +19,7 @@
                 <div class="data-group {{ $chunkIndex > 0 ? 'd-none' : '' }}" id="p-{{ $chunkIndex }}">
                     @foreach ($chunk as $data)
                     <div class="col-md-12 border-bottom">
-                        <a href="{{ $data->listing_url }}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <a href="/properties/{{ $data->id }}" style="text-decoration: none; color: inherit;">
                             <div class="row my-3">
                                 <div class="col-md-4">
                                     <div class="img-fluid bg-cover bg-position-center list-item-img rounded" style="background-image: url('{{ $data->picture_url }}');"></div>
