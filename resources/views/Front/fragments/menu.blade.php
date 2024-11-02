@@ -20,7 +20,7 @@
         <!-- Auth Buttons -->
         @if(session()->has('username'))
         <div class='d-flex align-items-center'>
-            <a href='/member/wishlist' class='text-decoration-none text-black'>
+            <a href='/member/profile' class='text-decoration-none text-black'>
                 <div class='d-flex align-items-center me-5'>
                     <div class='rounded-circle me-2' style='background-image: url("/images/member/avatar_01.jpg"); background-size: cover; height: 50px; width: 50px;'></div>
                     {{ session()->get('username') }}

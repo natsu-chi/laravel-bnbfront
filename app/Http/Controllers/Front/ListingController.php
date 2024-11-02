@@ -52,6 +52,7 @@ class ListingController extends Controller
     {
         $id = $req->id;
         $data = Listing::where('id', $id)
+                    //    ->where('instant_bookable', 't')
                        ->first();
         if (empty($data)) {
             return view('Front.properties.detail', ['data' => null]);

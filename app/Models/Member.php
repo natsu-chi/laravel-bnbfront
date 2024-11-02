@@ -44,29 +44,13 @@ class Member extends Model
         return $member;
     }
 
-    public function getByName($name, $password)
+    public function encryptPassword($password)
     {
-        $member = Member::where('name', $name)->first();
-        if(!isset($member)) {
-            return null;
-        }
-        if (!Hash::check($password, $member->password) )
-        {
-            return null;
-        } else
-        {
-            return $member;
-        }
+        $this->attributes['password'] = bcrypt($password);
     }
 
-    public function updatePassword($name, $newPassword)
+    public function validatePassword($password)
     {
-        $member = self::where("name", $name)->first();
-        if(!isset($member)) {
-            return false;
-        }
-        $member->password = bcrypt($newPassword);
-        $member->save();
-        return true;
+        return Hash::check($password, $this->attributes['password']);
     }
 }

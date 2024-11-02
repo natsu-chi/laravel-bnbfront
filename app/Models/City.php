@@ -21,7 +21,12 @@ class City extends Model
         'active' => 'boolean',
         'created_at' => 'date',
     ];
-    
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class, 'region_id');
+    }
+
     public function getDetailById($id)
     {
         /**

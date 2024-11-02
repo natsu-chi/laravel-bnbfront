@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\Front\FrontController;
 use App\Http\Controllers\Front\ListingController;
+use App\Http\Controllers\Front\MemberController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -18,6 +19,14 @@ Route::group(['prefix' => '/properties'], function(){
     Route::get('/search', [ListingController::class, 'listByQueries']);
     Route::get('/search/url', [ListingController::class, 'getByUrl']);
     Route::get('/{id}', [ListingController::class, 'getById']);
+});
+
+Route::group(['middleware' => 'member', 'prefix' => '/member'], function(){
+    Route::group(['prefix' => '/profile'], function(){
+        Route::get('/', [MemberController::class, 'getProfile']);
+        Route::post('/account/update', [MemberController::class, 'updateProfile']);
+        Route::post('/password/update', [MemberController::class, 'updatePassword']);
+    });
 });
 
 Route::fallback(function () {
