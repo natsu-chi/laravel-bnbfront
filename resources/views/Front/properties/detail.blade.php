@@ -62,7 +62,12 @@
             <div>
                 <h1 class='fw-bold text-2xl'>{{ $data->name }}</h1>
                 <div class='rating'>
-                    <span>★★★★★</span> <span>({{ count($comments) }} 則評論)</span>
+                    @if (isset($review))
+                    <span class='fw-bold'>★ {{ $review->review_scores_rating }}</span> <span>({{ count($comments) }} 則評論)</span>
+                    @else
+                    <span class='fw-bold'>★ (暫無評分)</span>
+                    @endif
+                
                 </div>
             </div>
 

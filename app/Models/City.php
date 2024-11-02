@@ -21,7 +21,7 @@ class City extends Model
         'active' => 'boolean',
         'created_at' => 'date',
     ];
-
+    
     public function getDetailById($id)
     {
         /**

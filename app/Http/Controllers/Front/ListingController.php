@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Listing;
 use App\Models\ListingComment;
+use App\Models\ListingReview;
 use Illuminate\Http\Request;
 
 class ListingController extends Controller
@@ -51,7 +52,6 @@ class ListingController extends Controller
     {
         $id = $req->id;
         $data = Listing::where('id', $id)
-                    //    ->where('instant_bookable', 't')
                        ->first();
         if (empty($data)) {
             return view('Front.properties.detail', ['data' => null]);
@@ -62,13 +62,17 @@ class ListingController extends Controller
         $comments = ListingComment::where('listing_id', $id)
                                   ->get();
 
+        // 根據 id，取得評論分數
+        $review = ListingReview::where('id', $id)
+                               ->first();
+                              
         // 根據 listing 的 city_id，取得城市詳細資料
         $city = (new City())->getDetailById($data->city_id);
         if (empty($city)) {
             return view('Front.properties.detail', ['data' => null]);
             exit;
         }
-        return view('Front.properties.detail', ['data' => $data, 'cityInfo' => $city, 'comments' => $comments]);
+        return view('Front.properties.detail', ['data' => $data, 'cityInfo' => $city, 'comments' => $comments, 'review' => $review]);
     }
 
     public function listByCity(Request $req)
