@@ -27,6 +27,10 @@ Route::group(['middleware' => 'member', 'prefix' => '/member'], function(){
         Route::post('/account/update', [MemberController::class, 'updateProfile']);
         Route::post('/password/update', [MemberController::class, 'updatePassword']);
     });
+    Route::group(['prefix' => '/wishlist'], function(){
+        Route::post('/add', [MemberController::class, 'addWishlistItem']);
+        Route::post('/delete', [MemberController::class, 'deleteWishlistItem']);
+    });
 });
 
 Route::fallback(function () {

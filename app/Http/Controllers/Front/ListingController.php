@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\Listing;
 use App\Models\ListingComment;
 use App\Models\ListingReview;
+use App\Models\MemberWishlistItem;
 use Illuminate\Http\Request;
 
 class ListingController extends Controller
@@ -52,7 +53,6 @@ class ListingController extends Controller
     {
         $id = $req->id;
         $data = Listing::where('id', $id)
-                    //    ->where('instant_bookable', 't')
                        ->first();
         if (empty($data)) {
             return view('Front.properties.detail', ['data' => null]);
@@ -73,6 +73,18 @@ class ListingController extends Controller
             return view('Front.properties.detail', ['data' => null]);
             exit;
         }
+
+        // 如果是登入狀態，取得是否加入收藏
+        if (session()->has('username') || session()->has('memberId')) {
+            $likedItem = MemberWishlistItem::where('created_by', session()->get('memberId'))
+                                           ->where('active', 'Y')
+                                           ->where('listing_id', $id)
+                                           ->first();
+            if (isset($likedItem)) {
+                return view('Front.properties.detail', ['data' => $data, 'cityInfo' => $city, 'comments' => $comments, 'review' => $review, 'likedItem' => $likedItem->id]);
+            }
+        }
+        
         return view('Front.properties.detail', ['data' => $data, 'cityInfo' => $city, 'comments' => $comments, 'review' => $review]);
     }
 

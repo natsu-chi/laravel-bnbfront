@@ -67,7 +67,6 @@
                     @else
                     <span class='fw-bold'>★ (暫無評分)</span>
                     @endif
-                
                 </div>
             </div>
 
@@ -154,11 +153,19 @@
         <!-- Sidebar 價格 -->
         <div class='col-lg-4 mt-lg-5 border-bottom'>
             <!-- Wishlist Form -->
-            <div class='mb-4 d-flex justify-content-end {{ (session()->get("member"))?"":"invisible" }}'>
-                <button class='btn btn-primary'>
-                    <i class='fa-solid fa-heart mr-2'></i>
-                    加入收藏
+
+            <div class='mb-4 d-flex justify-content-end'>
+                @if (isset($likedItem) && (session()->get("memberId")))
+                <button data-status='1' class='btn btn-outline-danger' id='btn-like'>
+                    <i class='fa-solid fa-heart me-1' id='icon-like'></i>
+                    <span id='btn-like-text'>已收藏</span>
                 </button>
+                @else
+                <button data-status='0' class='btn btn-outline-danger' id='btn-like'>
+                    <i class='fa-regular fa-heart me-1' id='icon-like'></i>
+                    <span id='btn-like-text'>加入收藏</span>
+                </button>
+                @endif
             </div>
             <div>
                 <div class='fw-bolder mb-3' class='text-sm'>平均 <span class='text-3xl'>${{ number_format($data->price, 0) }}</span> / 晚</div>
@@ -204,7 +211,7 @@
                 <div class='border rounded p-3 mt-3'>
                     <p class='fw-bold'>{{ $comment->reviewer_name}}&emsp;&emsp;</p>
                     <p>{!! $comment->comments !!}</p>
-                    <span class='text-sm fw-normal text-muted'>{{ $comment->date}}</span>
+                    <span class='text-sm fw-normal text-muted'>{{ $comment->date }}</span>
                 </div>
             @endforeach
         </div>
@@ -216,12 +223,39 @@
     </div>
 </div>
 <script>
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    var like = $('#btn-like').data('status');
     $(document).ready(function() {
         // 分類資料
         propertyData = @json($data);
-        console.log(propertyData);
-
         renderMap(new Array(propertyData));
+
+        $('#btn-like').click(function () {
+            let url = '';
+            if (like == 0) {
+                url = '/member/wishlist/add';
+            } else {
+                url = '/member/wishlist/delete';
+            }
+            alert(url);
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    'listing_id': {{ $data->id }},
+                    '_token': csrfToken
+                },
+                dataType: 'json',
+                success: function(res) {
+                    // 切換按鈕狀態
+                    like = (like == 1) ? 0 : 1;
+                    renderLikeBtn(like);
+                },
+                error: function(error) {
+                    alert(`error- ${url}`);
+                }
+            });
+        });
     });
 
     function show(id) {
@@ -243,7 +277,6 @@
     }
 
     function appendToMap(dataList) {
-        console.log(dataList);
         $.each(dataList, function(i, item) {
             L.marker([item.latitude, item.longitude]).addTo(map)
                 .bindPopup(
@@ -276,6 +309,22 @@
         });
 
         markers = new L.markerClusterGroup().addTo(map);
+    }
+
+    function renderLikeBtn(status) {
+        if (status == 1) {
+            $('#icon-like').removeClass('fa-regular');
+            $('#icon-like').addClass('fa-solid');
+
+            $('#btn-like-text').text('已收藏');
+            $('#btn-like').attr('data-status', '1');
+        } else {
+            $('#icon-like').removeClass('fa-solid');
+            $('#icon-like').addClass('fa-regular');
+
+            $('#btn-like-text').text('加入收藏');
+            $('#btn-like').attr('data-status', '0');
+        }
     }
 </script>
 @endsection

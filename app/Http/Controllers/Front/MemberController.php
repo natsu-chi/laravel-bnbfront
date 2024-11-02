@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Controller;
 use App\Models\Member;
+use App\Models\MemberWishlistItem;
 
 class MemberController extends Controller
 {
@@ -104,5 +105,65 @@ class MemberController extends Controller
             Session::flash("errorMessage", "更新失敗");
             return back()->withInput()->withErrors(["errorF02" => $th->getMessage()]);
         }
+    }
+
+    public function addWishlistItem(Request $req)
+    {
+        $listingId = $req->listing_id;
+        $id = session()->get('memberId');
+
+        $member = (new Member)->getById($id);
+        if (empty($member)) {
+            Session::flash("errorMessage", "收藏失敗");
+            response()->json(['error' => '加入清單失敗'], 400);
+        }
+
+        $mwi = MemberWishlistItem::where('created_by', $member->id)
+                                 ->where('listing_id', $listingId)
+                                 ->first();
+        
+        if (empty($mwi)) {
+            $mwi = new MemberWishlistItem();
+            $mwi->created_by = $id;
+            $mwi->listing_id = $listingId;
+            $mwi->active = 'Y';
+            $result = $mwi->save();
+        } else {
+            $mwi->active = 'Y';
+            $result = $mwi->save();
+        }
+
+        if ($result) {
+            return response()->json(['msg' => '加入成功'], 200);
+        } else {
+            return response()->json(['error' => '加入清單失敗'], 404);
+        }
+    }
+
+    public function deleteWishlistItem(Request $req)
+    {
+        $listingId = $req->listing_id;
+
+        $member = (new Member)->getById(session()->get('memberId'));
+        if (empty($member)) {
+            Session::flash("errorMessage", "收藏失敗");
+            response()->json(['error' => '移除清單失敗'], 400);
+        }
+
+        $mwi = MemberWishlistItem::where('created_by', $member->id)
+                                 ->where('listing_id', $listingId)
+                                 ->first();
+
+        if (isset($mwi)) {
+            $mwi->active = '';
+            $mwi->updated_at = now();
+            $result = $mwi->save();
+            if ($result) {
+                return response()->json(['msg' => '移除成功'], 200);
+                exit;
+            }
+        }
+        
+        return response()->json(['error' => '移除清單失敗'], 404);
     }
 }
