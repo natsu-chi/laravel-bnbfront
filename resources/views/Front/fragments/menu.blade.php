@@ -8,13 +8,30 @@
             </div> -->
             </a>
         </div>
-
+        
         <!-- Navigation -->
         <nav class='d-none d-md-flex justify-content-between'>
-            <a href='/about' class='nav-link me-3'>關於我們</a>
-            <a href='/host' class='nav-link me-3'>屋主專區</a>
-            <a href='/blog' class='nav-link me-3'>部落格</a>
-            <a href='/advanced' class='nav-link text-danger fw-bold'>在 The Pier 瞧瞧進階功能 <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            @foreach($menus as $menu)
+                @if($menu->types == 'U')
+                <a href='{{ $menu->url }}' class='nav-link me-3'>{{ $menu->s1_name }}</a>
+                @elseif($menu->types == 'G')
+                    @if($menu->MenuS2->isNotEmpty())
+                        <div class="dropdown" >
+                            <div class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ $menu->s1_name }}
+                            </div>
+                            <ul class="dropdown-menu">
+                                @foreach($menu->MenuS2 as $child)
+                                <li><a class="dropdown-item" href="{{ $child->url }}">{{ $child->s2_name }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                @endif
+            @endforeach
+            <div class='ms-3'>
+                <a href='/advanced' class='nav-link text-danger fw-bold'>在 The Pier 瞧瞧進階功能 <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            </div>
         </nav>
 
         <!-- Auth Buttons -->
