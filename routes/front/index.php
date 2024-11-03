@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Front\FrontController;
+use App\Http\Controllers\Front\AboutController;
 use App\Http\Controllers\Front\ListingController;
 use App\Http\Controllers\Front\MemberController;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,8 @@ Route::group(['middleware' => 'menu'], function () {
     Route::post('/login', [FrontController::class, 'doLogin']);
     Route::post('/signup', [FrontController::class, 'doSignup']);
 
+    Route::get('/about', [AboutController::class, 'list']);
+    
     Route::group(['prefix' => '/properties'], function() {
         // /search?location={city_name}&checkin={10/1/2024}&checkout{10/1/2024}=&adults=2&children=0&pets=0
         Route::get('/search', [ListingController::class, 'listByQueries']);
