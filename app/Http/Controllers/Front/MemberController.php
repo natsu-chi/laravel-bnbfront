@@ -119,6 +119,8 @@ class MemberController extends Controller
                                      ->get();
         if ($mwiList->isNotEmpty()) {
             return view('Front.member.wishlist', ['list' => $mwiList]);
+        } else {
+            return view('Front.member.wishlist', ['list' => []]);
         }
     }
 
